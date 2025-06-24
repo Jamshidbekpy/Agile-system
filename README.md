@@ -1,131 +1,163 @@
-# Django-Boilerplate
 
-Django-Boilerplate for start a new project
+# Agile-system
 
-## How to set up project (with Docker)
+**Agile-system** — bu **Jira/Trello** kabi Agile metodologiyasiga asoslangan vazifa (task) boshqaruv tizimi. Loyihada foydalanuvchilar rollar orqali bir-biriga bog‘langan, har bir rol o‘ziga xos ruxsatlarga ega. Loyihaning asosiy maqsadi — task lifecycle'ni real vaqtda boshqarish va kuzatish.
 
-Give permission to docker script: ```chmod +x ./docker-compose```
-Give permission to docker script: ```chmod +x entrypoint.dev.sh```
+---
 
-### Docker compose file
+## Texnologiyalar
 
-Build and docker up containers: ```docker-compose -f docker-compose.dev.yml up -d --build```
+- Python 3.12  
+- Django 5.x  
+- Django REST Framework  
+- JWT Authentication (SimpleJWT)  
+- WebSocket (`channels`, `channels_redis`)  
+- Celery + Redis (background task va email bildirishnomalar uchun)  
+- Swagger (drf-yasg)  
+- PostgreSQL  
+- Flower (Celery monitoring)  
+- Faker (test userlar uchun)
 
-### Use docker-compose file
+---
 
-```./docker-compose makemigrations```
-or ```docker-compose -f docker-compose.dev.yml exec web python manage.py makemigrations```
+## Rollar va Imkoniyatlar
 
-## How to run project locally bash script (Linux, Mac)
+| Rol              | Imkoniyatlar |
+|------------------|--------------|
+| **Project Owner** | Loyihani yaratish, ro'yhatdan o'tkazish, rollarni tayinlash |
+| **Project Manager** | Task yaratish, assignee tanlash, status va priority o'zgartirish |
+| **Developer**    | `To Do → In Progress → Ready for Testing` holatlarini o‘zgartirish |
+| **Tester**       | Taskni **qabul qilish (✅ Done)** yoki **rad etish (❌ To Do)** |
 
-### install requirements
+---
 
-```bash
-python3 -m venv env
-source env/bin/activate
-pip install -r requirements/develop.text
-```
-
-### create .env file
-
-```bash
-cp .env.example .env
-```
-
-### create database
-
-```bash
-sudo -u postgres psql
-CREATE DATABASE django_boilerplate;
-CREATE USER django_boilerplate WITH PASSWORD 'django_boilerplate';
-ALTER ROLE django_boilerplate SET client_encoding TO 'utf8';
-ALTER ROLE django_boilerplate SET default_transaction_isolation TO 'read committed';
-ALTER ROLE django_boilerplate SET timezone TO 'UTC';
-GRANT ALL PRIVILEGES ON DATABASE django_boilerplate TO django_boilerplate;
-\q
-```
-
-### set up .env file with your database credentials
+## O‘rnatish
 
 ```bash
-nano .env
+git clone https://github.com/Jamshidbekpy/Agile-system.git
+cd Agile-system
+python -m venv venv
+source venv/bin/activate  # yoki Windows: venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
-### run migrations
+### .env misoli
+
+```
+SECRET_KEY=django-insecure-123
+DEBUG=True
+ALLOWED_HOSTS=127.0.0.1,localhost
+
+DATABASE_URL=postgres://user:password@localhost:5432/agile_db
+
+REDIS_URL=redis://localhost:6379
+
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=your@gmail.com
+EMAIL_HOST_PASSWORD=yourpassword
+EMAIL_USE_TLS=True
+```
+
+---
+
+## Ishga tushirish
 
 ```bash
 python manage.py migrate
-```
-
-### run server
-
-```bash
+python manage.py createsuperuser
 python manage.py runserver
 ```
 
-## Pre-commit  must be installed for all projects
+---
+
+## ASGI (WebSocket) uchun sozlash
 
 ```bash
-pip install pre-commit
-pre-commit install
+# redis-server terminalda ochiq bo'lishi kerak
+redis-server
+
+# Celery
+celery -A config worker -l info
+
+# Flower (Celery monitoring)
+celery -A config flower --port=5555
 ```
 
-# Back-End Checklist
+---
 
-## 1. Environment Configuration:
+## Auth: JWT
 
-- [ ] Ensure that the Django project settings are properly configured for the production environment.
-- [ ] Set `DEBUG` to `False` in the production settings (`settings.py`).
-- [ ] Verify that the `ALLOWED_HOSTS` setting includes the production domain names or IP addresses.
+- `api/token/` – Login (email + password)
+- `api/token/refresh/` – Token yangilash
+- `api/token/verify/` – Token tekshirish
 
-## 2. Security:
+---
 
-- [ ] Secure sensitive data, such as secret keys and database credentials, by storing them in environment variables or a
-  secure secrets management system.
-- [ ] Implement Cross-Site Request Forgery (CSRF) protection.
-- [ ] Require Google reCAPTCHA in login forms.
+## Real Time: WebSocket
 
-## 3. Database:
+- Redis orqali kanal xabarlari yuboriladi (`channels`)
+- `High Priority` tasklar barcha userlarga real vaqt rejimida bildirish sifatida yuboriladi
 
-- [ ] Ensure all migrations are correctly created.
-- [ ] Optimize database queries for performance.
+---
 
-## 4. Static and Media Files:
+## Xabarnomalar
 
-- [ ] Collect and compress static files using `collectstatic` and configure their storage.
-- [ ] Handle user-uploaded media files securely and efficiently.
-- [ ] Compress media files.
-- [ ] Create media models for all media.
+| Holat                    | Kimga yuboriladi |
+|--------------------------|------------------|
+| Yangi task               | Developer / Tester |
+| Status: In Progress      | Project Manager    |
+| Ready for Testing        | Tester             |
+| Rejected                 | Developer          |
+| **High Priority task**   | **Barcha**         |
 
-## 5. Logging and Monitoring:
+Bildirishnomalar:
+- WebSocket orqali (`channel_layer.group_send`)
+- Email orqali (Celery + Django Email)
 
-- [ ] Implement monitoring and alerting using tools like Prometheus, Grafana, Flower, and Sentry (must-have).
+---
 
-## 6. Performance Optimization:
+## API Endpoints
 
-- [ ] Profile and optimize database queries, views, and templates for performance (use `DEBUGTOOLBAR`, `django-silk`).
-- [ ] Implement caching mechanisms for frequently accessed data (depends on project).
-- [ ] Configure web server settings, such as Gunicorn or Uvicorn, for optimal performance.
+| Endpoint | Tavsif | Method | Permission |
+|----------|--------|--------|------------|
+| `/api/tasks/` | Task ro'yxati / yaratish | GET, POST | Manager |
+| `/api/tasks/<id>/` | Task detallari | GET, PUT, DELETE | Har xil rollar |
+| `/api/tasks/<id>/change_status/` | Developer o'zgartiradi | POST | Developer |
+| `/api/tasks/<id>/approve/` | Tester qabul qiladi | POST | Tester |
+| `/api/tasks/<id>/reject/` | Tester rad etadi | POST | Tester |
+| `/api/tasks/<id>/history/` | Task tarixi | GET | Har kim |
+| `/api/users/register/` | Ro‘yxatdan o‘tish | POST | - |
+| `/api/users/login/` | Login (JWT) | POST | - |
 
-## 7. Testing:
+---
 
-- [ ] Conduct integration tests and unit tests.
-- [ ] Set up a staging environment that closely mirrors the production environment for testing purposes (if needed).
+## Test foydalanuvchilar yaratish
 
-## 8. Documentation:
+```bash
+python manage.py init_users 10
+```
 
-- [ ] Ensure that the codebase is well-documented, including comments and docstrings, and add API documentation to
-  Swagger.
+Bu komandani ishga tushirsangiz, 10 ta turli rollarga ega `Faker` asosidagi foydalanuvchilar yaratiladi.
 
-## 9. Common Coding Requirements:
+---
 
-- [ ] Implement pre-commit hooks.
-- [ ] Use appropriate branches like `dev` and `master`.
-- [ ] Add search history API.
-- [ ] Implement initial notifications.
-- [ ] Provide a complete README (including deployment and project setup guide).
-- [ ] Use Docker for production deployment.
+## Swagger
 
-## 10. Testing the Production Environment:
+API'ni vizual test qilish:
+```
+http://localhost:8000/swagger/
+```
 
-- [ ] Conduct load testing to ensure the application can handle expected traffic volumes (using Locust.io).
+---
+
+## Muallif
+
+**Jamshidbek Shodibekov**  
+GitHub: [@Jamshidbekpy](https://github.com/Jamshidbekpy)
+
+---
+
+## Litsenziya
+
+MIT License – `Agile-system` ochiq kodli loyiha.
