@@ -1,8 +1,11 @@
+from django.utils.translation import gettext_lazy as _
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
+from apps.task.permissions import IsProjectOwner
+from apps.accounts.models import Role
+
 
 from .serializers import RegisterSerializer, UserSerializer
 from django.contrib.auth import get_user_model
@@ -34,3 +37,21 @@ class UserMeView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+
+class AssignRoleAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsProjectOwner]
+
+    def post(self, request, pk):
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response({"error": _("User not found")}, status=404)
+
+        role = request.data.get("role")
+        if role not in Role.values:
+            return Response({"error": _("Invalid role")}, status=400)
+
+        user.role = role
+        user.save()
+
+        return Response({"success": _(f"{user.username} assigned as {user.get_role_display()}")})
