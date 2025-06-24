@@ -1,0 +1,83 @@
+version: "3.8"
+
+services:
+  db:
+    container_name: ${PROJECT_NAME}_db
+    image: postgres:16
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_HOST=${DB_HOST}
+      - POSTGRES_PORT=${DB_PORT}
+      - POSTGRES_HOST_AUTH_METHOD=md5
+      - POSTGRES_INITDB_ARGS=--auth=md5
+    restart: always
+
+  pgbouncer:
+    image: edoburu/pgbouncer
+    container_name: ${PROJECT_NAME}_pgbouncer
+    environment:
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      - POOL_MODE=transaction
+      - MAX_DB_CONNECTIONS=100
+      - DEFAULT_POOL_SIZE=20
+      - AUTH_TYPE=md5
+    depends_on:
+      - db
+    restart: on-failure
+
+  web: &web
+    container_name: ${PROJECT_NAME}_backend
+    restart: always
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: ./entrypoint.dev.sh
+    security_opt:
+      - seccomp:unconfined
+    volumes:
+      - ./:/app
+      - ./static:/home/app/web/static
+      - ./media:/home/app/web/media
+      - ./locale:/home/app/web/locale
+    env_file:
+      - .env
+    environment:
+      - TZ=Asia/Tashkent
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@${PG_BOUNCER_HOST}:${PG_BOUNCER_PORT}/${DB_NAME}
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+      - pgbouncer
+      - redis
+
+#  daphne:
+#    <<: *web
+#    container_name: ${PROJECT_NAME}_ws
+#    command: python -m daphne -b 0.0.0.0 -p 8893 core.asgi:application
+#    ports:
+#      - 8893:8893
+
+  redis:
+    container_name: ${PROJECT_NAME}_redis
+    image: redis:7.2.4-alpine
+    restart: always
+
+  celery:
+    container_name: ${PROJECT_NAME}_celery
+    <<: *web
+    ports: [ ]
+    command: celery -A core worker --beat --scheduler django --loglevel=info
+    restart: always
+
+volumes:
+  postgres_data:
+  static_volume:

@@ -1,0 +1,43 @@
+from django.contrib import admin
+from .models import Task, TaskHistory
+from django.utils.translation import gettext_lazy as _
+
+
+class TaskHistoryInline(admin.TabularInline):
+    model = TaskHistory
+    extra = 0
+    readonly_fields = ("user", "action", "timestamp")
+    can_delete = False
+    verbose_name = _("Task History")
+    verbose_name_plural = _("Task History")
+
+
+@admin.register(Task)
+class TaskAdmin(admin.ModelAdmin):
+    list_display = ("title", "assignee", "status", "priority", "created_at", "updated_at")
+    list_filter = ("status", "priority", "assignee")
+    search_fields = ("title", "description", "assignee__username")
+    readonly_fields = ("created_at", "updated_at")
+    ordering = ("-priority", "-created_at")
+    inlines = [TaskHistoryInline]
+
+    fieldsets = (
+        (None, {
+            "fields": ("title", "description", "assignee")
+        }),
+        (_("Status and Priority"), {
+            "fields": ("status", "priority", "rejection_comment")
+        }),
+        (_("Timestamps"), {
+            "fields": ("created_at", "updated_at")
+        }),
+    )
+
+
+@admin.register(TaskHistory)
+class TaskHistoryAdmin(admin.ModelAdmin):
+    list_display = ("task", "user", "action", "timestamp")
+    list_filter = ("timestamp", "user")
+    search_fields = ("task__title", "action", "user__username")
+    readonly_fields = ("task", "user", "action", "timestamp")
+    ordering = ("-timestamp",)
