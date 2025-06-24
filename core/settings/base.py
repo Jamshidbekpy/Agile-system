@@ -66,6 +66,7 @@ THIRD_PARTY_APPS = [
     "rosetta",
     "channels",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
 ]
 
 REST_FRAMEWORK = {

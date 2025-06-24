@@ -7,7 +7,7 @@ from apps.task.permissions import IsProjectOwner
 from apps.accounts.models import Role
 
 
-from .serializers import RegisterSerializer, UserSerializer
+from .serializers import RegisterSerializer, UserSerializer, AssignRoleSerializer
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -39,15 +39,18 @@ class UserMeView(generics.RetrieveAPIView):
         return self.request.user
 
 class AssignRoleAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated, IsProjectOwner]
+    permission_classes = [IsProjectOwner]
 
     def post(self, request, pk):
         try:
             user = User.objects.get(pk=pk)
         except User.DoesNotExist:
             return Response({"error": _("User not found")}, status=404)
-
-        role = request.data.get("role")
+        
+        serializer = AssignRoleSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        role = serializer.validated_data["role"]
+        
         if role not in Role.values:
             return Response({"error": _("Invalid role")}, status=400)
 

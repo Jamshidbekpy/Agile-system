@@ -7,5 +7,6 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = BaseUserAdmin.fieldsets + (
         ('Role Info', {'fields': ('role',)}),
     )
-    list_display = ('username', 'email', 'role', 'is_active', 'is_staff')
+    list_display = ('id', 'username', 'email', 'role', 'is_active', 'is_staff')
     list_filter = ('role',)
+    ordering = ('id',)
