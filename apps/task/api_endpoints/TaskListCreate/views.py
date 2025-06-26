@@ -7,16 +7,17 @@ from apps.task.permissions import IsProjectOwnerOrManager, IsAnyRole
 
 
 class TaskListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Task.objects.all().select_related('assignee')
+    queryset = Task.objects.all().prefetch_related("assignees")
     serializer_class = TaskSerializer
 
     def perform_create(self, serializer):
-        task = serializer.save()
+        task = serializer.save(creator=self.request.user)
         TaskHistory.objects.create(
             task=task,
             user=self.request.user,
             action=_("Task created")
-        )
+            )
+        
     def get_permissions(self):
         if self.request.method == "POST":
             return [IsAuthenticated(), IsProjectOwnerOrManager()]

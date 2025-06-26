@@ -2,17 +2,17 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from .serializers import TaskSerializer
 from apps.task.models import Task
-from apps.task.permissions import IsProjectOwnerOrManager, IsAnyRole
+from apps.task.permissions import IsProjectOwner, IsAnyRole
 
 
 
 class TaskRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Task.objects.all().select_related('assignee')
+    queryset = Task.objects.all().prefetch_related('assignees')
     serializer_class = TaskSerializer
     
     def get_permissions(self):
         if self.request.method in ["PUT", "PATCH", "DELETE"]:
-            return [IsAuthenticated(), IsProjectOwnerOrManager()]
+            return [IsAuthenticated(), IsProjectOwner()]
         return [IsAuthenticated(), IsAnyRole()]
 
     

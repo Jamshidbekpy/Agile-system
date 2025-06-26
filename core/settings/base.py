@@ -52,7 +52,6 @@ CUSTOM_APPS = [
     "apps.accounts",
     "apps.common",
     "apps.task",
-    "apps.notifications",
 
 ]
 
@@ -67,6 +66,7 @@ THIRD_PARTY_APPS = [
     "channels",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
+    'query_counter',
 ]
 
 REST_FRAMEWORK = {
@@ -85,6 +85,7 @@ REST_FRAMEWORK = {
 INSTALLED_APPS = DJANGO_APPS + CUSTOM_APPS + THIRD_PARTY_APPS
 
 MIDDLEWARE = [
+    "query_counter.middleware.DjangoQueryCounterMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -96,7 +97,20 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     'nplusone.ext.django.NPlusOneMiddleware',
 ]
-
+{
+    'DQC_SLOWEST_COUNT': 5,
+    'DQC_TABULATE_FMT': 'pretty',
+    'DQC_SLOW_THRESHOLD': 1,  # seconds
+    'DQC_INDENT_SQL': True,
+    'DQC_PYGMENTS_STYLE': 'tango',
+    'DQC_PRINT_ALL_QUERIES': False,
+    'DQC_COUNT_QTY_MAP': {
+        5: 'green',
+        10: 'white',
+        20: 'yellow',
+        30: 'red',
+    },
+}
 ROOT_URLCONF = "core.urls"
 
 TEMPLATES = [
@@ -259,6 +273,7 @@ EMAIL_PORT=env.int("EMAIL_PORT", 1025)
 EMAIL_USE_TLS=env.bool("EMAIL_USE_TLS", False)
 EMAIL_HOST_USER=env.str("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD=env.str("EMAIL_HOST_PASSWORD", "")
+
 
 CHANNEL_LAYERS = {
     "default": {

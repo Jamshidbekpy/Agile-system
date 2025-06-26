@@ -7,15 +7,16 @@ from django.utils.translation import gettext_lazy as _
 User = get_user_model()
 
 class Task(BaseModel):
+    creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(_('Title'),max_length=255)
     description = models.TextField(_('Description'))
 
-    assignee = models.ForeignKey(
+    assignees = models.ManyToManyField(
         User,
-        on_delete=models.SET_NULL,
-        null=True,
+        related_name="assigned_tasks",
+        verbose_name=_("Assignees"),
+        through="TaskAssignee",
         blank=True,
-        related_name="assigned_tasks"
     )
 
     status = models.CharField(
@@ -41,6 +42,18 @@ class Task(BaseModel):
 
     def __str__(self):
         return f"{self.title} [{self.status}] ({self.priority})"
+    
+class TaskAssignee(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    assignee = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    class Meta:
+        verbose_name = _('Task Assignee')
+        verbose_name_plural = _('Task Assignees')
+        unique_together = ('task', 'assignee')
+
+    def __str__(self):
+        return f"{self.task} - {self.assignee}"
 
 class TaskHistory(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="history")

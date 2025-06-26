@@ -2,14 +2,15 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from apps.task.models import Task, TaskHistory
 from apps.task.choices import TaskStatus
+from apps.task.models import Task, TaskHistory
+from .serializers import TaskChangeStatusSerializer
 from apps.task.permissions import IsProjectManager, IsDeveloper
 
 
 
 class TaskChangeStatusAPIView(APIView):
-    permission_classes = [IsAuthenticated, IsProjectManager, IsDeveloper]
+    permission_classes = [IsAuthenticated, IsProjectManager | IsDeveloper]
 
 
     def post(self, request, pk):
@@ -17,8 +18,24 @@ class TaskChangeStatusAPIView(APIView):
             task = Task.objects.get(pk=pk)
         except Task.DoesNotExist:
             return Response({"error": _("Task not found")}, status=404)
-
-        new_status = request.data.get("status")
+        
+        if task.status in [TaskStatus.BACKLOG, TaskStatus.REJECTED, TaskStatus.DONE] and request.user.role == "developer":
+            return Response({"error": _("You can't change the status of this task")}, status=403)
+        
+        if task.status in [TaskStatus.IN_PROGRESS, TaskStatus.READY_FOR_TESTING,TaskStatus.REJECTED, TaskStatus.DONE] and request.user.role == "project_manager":
+            return Response({"error": _("You can't change the status of this task")}, status=403)
+        
+        serializer = TaskChangeStatusSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        new_status = serializer.validated_data["status"]
+        
+        if new_status in [TaskStatus.BACKLOG, TaskStatus,TaskStatus.REJECTED, TaskStatus.DONE] and request.user.role == "developer":
+            return Response({"error": _("You can't change the status of this task")}, status=403)
+        
+        if new_status in [TaskStatus.IN_PROGRESS, TaskStatus.READY_FOR_TESTING,TaskStatus.REJECTED, TaskStatus.DONE] and request.user.role == "project_manager":
+            return Response({"error": _("You can't change the status of this task")}, status=403)    
+            
         if new_status not in dict(TaskStatus.CHOICES):
             return Response({"error": _("Invalid status")}, status=400)
 

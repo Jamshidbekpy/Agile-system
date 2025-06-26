@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Task, TaskHistory
+from .models import Task, TaskHistory, TaskAssignee
 from django.utils.translation import gettext_lazy as _
 
 
@@ -14,24 +14,14 @@ class TaskHistoryInline(admin.TabularInline):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ("title", "assignee", "status", "priority", "created_at", "updated_at")
-    list_filter = ("status", "priority", "assignee")
-    search_fields = ("title", "description", "assignee__username")
+    list_display = ("title", "status", "priority", "created_at", "updated_at")
+    list_filter = ("status", "priority",)
+    search_fields = ("title", "description",)
     readonly_fields = ("created_at", "updated_at")
     ordering = ("-priority", "-created_at")
     inlines = [TaskHistoryInline]
 
-    fieldsets = (
-        (None, {
-            "fields": ("title", "description", "assignee")
-        }),
-        (_("Status and Priority"), {
-            "fields": ("status", "priority", "rejection_comment")
-        }),
-        (_("Timestamps"), {
-            "fields": ("created_at", "updated_at")
-        }),
-    )
+   
 
 
 @admin.register(TaskHistory)
@@ -41,3 +31,10 @@ class TaskHistoryAdmin(admin.ModelAdmin):
     search_fields = ("task__title", "action", "user__username")
     readonly_fields = ("task", "user", "action", "timestamp")
     ordering = ("-timestamp",)
+
+
+@admin.register(TaskAssignee)
+class TaskAssigneeAdmin(admin.ModelAdmin):
+    list_display = ("task", "assignee")
+    list_filter = ("task", "assignee")
+    search_fields = ("task__title", "assignee__username")

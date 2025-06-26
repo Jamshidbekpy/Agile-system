@@ -1,15 +1,20 @@
-from rest_framework import generics
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .serializers import TaskHistorySerializer
 from apps.task.models import TaskHistory
 from apps.task.permissions import IsAnyRole
-class TaskHistoryAPIView(generics.ListAPIView):
+from .serializers import TaskHistorySerializer
+
+
+class TaskHistoryAPIView(APIView):
     permission_classes = [IsAuthenticated, IsAnyRole]
-    serializer_class = TaskHistorySerializer
 
+    def get(self, request, pk):
+        histories = TaskHistory.objects.filter(task_id=pk).select_related("user").order_by("timestamp")
+        serializer = TaskHistorySerializer(histories, many=True)
+        return Response({
+            "task_id": pk,
+            "history": serializer.data
+        })
 
-    def get_queryset(self):
-        task_id = self.kwargs.get("pk")
-        return TaskHistory.objects.filter(task_id=task_id).select_related("user")
-    
 __all__ = ["TaskHistoryAPIView"]
