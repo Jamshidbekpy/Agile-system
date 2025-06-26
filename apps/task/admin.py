@@ -15,13 +15,17 @@ class TaskHistoryInline(admin.TabularInline):
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
     list_display = ("title", "status", "priority", "created_at", "updated_at")
-    list_filter = ("status", "priority",)
-    search_fields = ("title", "description",)
+    list_filter = (
+        "status",
+        "priority",
+    )
+    search_fields = (
+        "title",
+        "description",
+    )
     readonly_fields = ("created_at", "updated_at")
     ordering = ("-priority", "-created_at")
     inlines = [TaskHistoryInline]
-
-   
 
 
 @admin.register(TaskHistory)
@@ -38,14 +42,14 @@ class TaskAssigneeAdmin(admin.ModelAdmin):
     list_display = ("task", "assignee")
     list_filter = ("task", "assignee")
     search_fields = ("task__title", "assignee__username")
-    
-    
+
+
 @admin.register(Group)
 class GroupAdmin(admin.ModelAdmin):
-    list_display = ("id","name")
+    list_display = ("id", "name")
     search_fields = ("name",)
-    
-    
+
+
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
     list_display = ("group", "message", "timestamp")

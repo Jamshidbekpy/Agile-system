@@ -1,5 +1,6 @@
 import os
 import django
+
 django.setup()  # ⚠️ Django iloji boricha erta yuklansin
 
 from urllib.parse import parse_qs
@@ -12,12 +13,14 @@ from django.conf import settings
 
 User = get_user_model()
 
+
 @database_sync_to_async
 def get_user(user_id):
     try:
         return User.objects.get(id=user_id)
     except User.DoesNotExist:
         return AnonymousUser()
+
 
 class TokenAuthMiddleware:
     def __init__(self, inner):
@@ -44,7 +47,8 @@ class TokenAuthMiddleware:
             except Exception as e:
                 print("❌ JWT Error:", e)
 
-        return await self.inner(scope, receive, send) 
+        return await self.inner(scope, receive, send)
+
 
 class TokenAuthMiddlewareInstance:
     def __init__(self, scope, middleware):

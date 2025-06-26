@@ -1,1 +1,1 @@
-from .views import * # NOQA
+from .views import *  # NOQA

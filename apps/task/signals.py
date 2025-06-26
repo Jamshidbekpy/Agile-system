@@ -9,7 +9,6 @@ from .tasks import send_email_async
 
 
 def send_ws_and_email(user, subject, message, group_name):
-    
     # Email orqali
     send_email_async.delay(user.email, subject, message)
 
@@ -18,11 +17,11 @@ def send_ws_and_email(user, subject, message, group_name):
         group_name,
         {
             "type": "send_notification",
-            "message": message
-        }
+            "message": f"{message} for {user.username}",
+        },
     )
     group = Group.objects.get(name=group_name)
-    Notification.objects.create( group=group, message=message)
+    Notification.objects.create(group=group, message=message)
 
 
 @receiver(post_save, sender=Task)
@@ -34,7 +33,8 @@ def handle_task_events(sender, instance, created, **kwargs):
     priority = instance.priority
     rejection_comment = instance.rejection_comment or _("No reason provided")
     assignees = [
-        ta.assignee for ta in TaskAssignee.objects.select_related("assignee").filter(task=instance)
+        ta.assignee
+        for ta in TaskAssignee.objects.select_related("assignee").filter(task=instance)
     ]
 
     # 1. Yangi vazifa → Project Owner
@@ -84,7 +84,9 @@ def handle_task_events(sender, instance, created, **kwargs):
         for user in assignees:
             if user.role == "developer":
                 subject = _("Task Rejected")
-                message = _("#{id} was rejected: '{}'").format(task_id, rejection_comment)
+                message = _("#{id} was rejected: '{}'").format(
+                    task_id, rejection_comment
+                )
                 group_name = f"notifications_{creator.username}_{task_id}"
                 send_ws_and_email(user, subject, message, group_name)
 
@@ -92,7 +94,8 @@ def handle_task_events(sender, instance, created, **kwargs):
     if priority == TaskPriority.HIGH:
         for user in assignees:
             subject = _("Urgent Task!")
-            message = _("URGENT! Task #{id} (High): '{title}'").format(id=task_id, title=title)
+            message = _("URGENT! Task #{id} (High): '{title}'").format(
+                id=task_id, title=title
+            )
             group_name = f"notifications_{creator.username}_{task_id}"
             send_ws_and_email(user, subject, message, group_name)
-

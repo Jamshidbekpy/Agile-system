@@ -7,6 +7,7 @@ import random
 fake = Faker()
 User = get_user_model()
 
+
 class Command(BaseCommand):
     help = "Create fake users with random roles"
 
@@ -28,15 +29,14 @@ class Command(BaseCommand):
                 continue
 
             user = User.objects.create_user(
-                username=name,
-                email=email,
-                password=password,
-                role=role
+                username=name, email=email, password=password, role=role
             )
 
             created += 1
-            self.stdout.write(self.style.SUCCESS(
-                f"👤 Created user: {user.username} | {user.email} | {role}"
-            ))
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"👤 Created user: {user.username} | {user.email} | {role}"
+                )
+            )
 
         self.stdout.write(self.style.SUCCESS(f"\n Total created: {created}"))

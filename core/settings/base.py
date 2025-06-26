@@ -52,7 +52,6 @@ CUSTOM_APPS = [
     "apps.accounts",
     "apps.common",
     "apps.task",
-
 ]
 
 THIRD_PARTY_APPS = [
@@ -61,17 +60,17 @@ THIRD_PARTY_APPS = [
     "corsheaders",
     "modeltranslation",
     # "captcha",
-    'nplusone.ext.django',
+    "nplusone.ext.django",
     "rosetta",
     "channels",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
-    'query_counter',
+    "query_counter",
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_FILTER_BACKENDS": (
         "django_filters.rest_framework.DjangoFilterBackend",
@@ -95,22 +94,22 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'nplusone.ext.django.NPlusOneMiddleware',
+    "nplusone.ext.django.NPlusOneMiddleware",
 ]
 QUERY_COUNTER = {
-    'DQC_SLOWEST_COUNT': 5,
-    'DQC_TABULATE_FMT': 'pretty',
-    'DQC_SLOW_THRESHOLD': 1,  
-    'DQC_INDENT_SQL': True,
-    'DQC_PYGMENTS_STYLE': 'tango',
-    'DQC_PRINT_ALL_QUERIES': False,
-    'DQC_DETECT_DUPLICATES': True,       
-    'DQC_DUPLICATE_COLOR': 'red',         
-    'DQC_COUNT_QTY_MAP': {
-        5: 'green',
-        10: 'white',
-        20: 'yellow',
-        30: 'red',
+    "DQC_SLOWEST_COUNT": 5,
+    "DQC_TABULATE_FMT": "pretty",
+    "DQC_SLOW_THRESHOLD": 1,
+    "DQC_INDENT_SQL": True,
+    "DQC_PYGMENTS_STYLE": "tango",
+    "DQC_PRINT_ALL_QUERIES": False,
+    "DQC_DETECT_DUPLICATES": True,
+    "DQC_DUPLICATE_COLOR": "red",
+    "DQC_COUNT_QTY_MAP": {
+        5: "green",
+        10: "white",
+        20: "yellow",
+        30: "red",
     },
 }
 ROOT_URLCONF = "core.urls"
@@ -149,7 +148,7 @@ ASGI_APPLICATION = "core.asgi.application"
 #     }
 # }
 DATABASES = {
-    'default': dj_database_url.config(),
+    "default": dj_database_url.config(),
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = False
 DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = False
@@ -172,7 +171,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-NPLUSONE_LOGGER = logging.getLogger('nplusone')
+NPLUSONE_LOGGER = logging.getLogger("nplusone")
 NPLUSONE_LOG_LEVEL = logging.WARN
 
 # LOGGING = {
@@ -199,18 +198,16 @@ TIME_ZONE = "Asia/Tashkent"
 
 
 LANGUAGES = [
-    ('en', _('English')),
-    ('ru', _('Russian')),
-    ('uz', _('Uzbek')),
+    ("en", _("English")),
+    ("ru", _("Russian")),
+    ("uz", _("Uzbek")),
 ]
 
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-LOCALE_PATHS = (
-    BASE_DIR / 'locale',
-)
+LOCALE_PATHS = (BASE_DIR / "locale",)
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
@@ -265,16 +262,18 @@ AUTH_USER_MODEL = "accounts.User"
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
 
-EMAIL_BACKEND=env.str("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
-EMAIL_HOST=env.str("EMAIL_HOST", "localhost")
-EMAIL_PORT=env.int("EMAIL_PORT", 1025)
-EMAIL_USE_TLS=env.bool("EMAIL_USE_TLS", False)
-EMAIL_HOST_USER=env.str("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD=env.str("EMAIL_HOST_PASSWORD", "")
+EMAIL_BACKEND = env.str(
+    "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
+)
+EMAIL_HOST = env.str("EMAIL_HOST", "localhost")
+EMAIL_PORT = env.int("EMAIL_PORT", 1025)
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", False)
+EMAIL_HOST_USER = env.str("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD", "")
 
 
 CHANNEL_LAYERS = {

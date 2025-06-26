@@ -15,12 +15,12 @@ from django.core.asgi import get_asgi_application
 from core.routing import websocket_urlpatterns
 from core.middleware import TokenAuthMiddleware
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings.develop')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings.develop")
 django.setup()
 
-application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
-    "websocket": TokenAuthMiddleware(
-        URLRouter(websocket_urlpatterns)
-    ),
-})
+application = ProtocolTypeRouter(
+    {
+        "http": get_asgi_application(),
+        "websocket": TokenAuthMiddleware(URLRouter(websocket_urlpatterns)),
+    }
+)

@@ -8,9 +8,9 @@ from apps.task.choices import TaskStatus
 from apps.task.permissions import IsTester
 from .serializers import TaskRejectSerializer
 
+
 class TaskRejectAPIView(APIView):
     permission_classes = [IsAuthenticated, IsTester]
-
 
     def post(self, request, pk):
         user = request.user
@@ -18,21 +18,20 @@ class TaskRejectAPIView(APIView):
             task = Task.objects.get(pk=pk)
         except Task.DoesNotExist:
             return Response({"error": _("Task not found")}, status=404)
-        
+
         if user not in task.assignees.all():
             return Response(
                 {"error": _("You are not assigned to this task")},
-                status=status.HTTP_403_FORBIDDEN
+                status=status.HTTP_403_FORBIDDEN,
             )
-        
+
         if task.status != TaskStatus.READY_FOR_TESTING:
             return Response(
                 {"error": _("Task is not ready for testing")},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
         serializer = TaskRejectSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
 
         reason = serializer.validated_data["reason"]
         if not reason:
@@ -45,9 +44,10 @@ class TaskRejectAPIView(APIView):
         TaskHistory.objects.create(
             task=task,
             user=request.user,
-            action=_("Status: Rejected (Reason: '{}')").format(reason)
+            action=_("Status: Rejected (Reason: '{}')").format(reason),
         )
 
         return Response({"success": _("Task rejected and sent back to To Do")})
+
 
 __all__ = ["TaskRejectAPIView"]

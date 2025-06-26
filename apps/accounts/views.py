@@ -12,6 +12,7 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [permissions.AllowAny]
@@ -38,6 +39,7 @@ class UserMeView(generics.RetrieveAPIView):
     def get_object(self):
         return self.request.user
 
+
 class AssignRoleAPIView(APIView):
     permission_classes = [IsProjectOwner]
 
@@ -46,15 +48,17 @@ class AssignRoleAPIView(APIView):
             user = User.objects.get(pk=pk)
         except User.DoesNotExist:
             return Response({"error": _("User not found")}, status=404)
-        
+
         serializer = AssignRoleSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         role = serializer.validated_data["role"]
-        
+
         if role not in Role.values:
             return Response({"error": _("Invalid role")}, status=400)
 
         user.role = role
         user.save()
 
-        return Response({"success": _(f"{user.username} assigned as {user.get_role_display()}")})
+        return Response(
+            {"success": _(f"{user.username} assigned as {user.get_role_display()}")}
+        )

@@ -19,36 +19,32 @@ class TaskApproveAPIView(APIView):
             task = Task.objects.get(pk=pk)
         except Task.DoesNotExist:
             return Response(
-                {"error": _("Task not found")},
-                status=status.HTTP_404_NOT_FOUND
+                {"error": _("Task not found")}, status=status.HTTP_404_NOT_FOUND
             )
 
         if user not in task.assignees.all():
             return Response(
                 {"error": _("You are not assigned to this task")},
-                status=status.HTTP_403_FORBIDDEN
+                status=status.HTTP_403_FORBIDDEN,
             )
-        
+
         if task.status != TaskStatus.READY_FOR_TESTING:
             return Response(
                 {"error": _("Task is not ready for testing")},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
-            
+
         task.status = TaskStatus.DONE
         task.save()
 
         TaskHistory.objects.create(
-            task=task,
-            user=user,
-            action=_("Status changed: Ready for Testing → Done")
+            task=task, user=user, action=_("Status changed: Ready for Testing → Done")
         )
 
         return Response(
             {"success": _("Task approved and marked as Done")},
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
-
 
 
 __all__ = ["TaskApproveAPIView"]

@@ -5,15 +5,14 @@ from apps.task.models import Task
 from apps.task.permissions import IsProjectOwner, IsAnyRole
 
 
-
 class TaskRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Task.objects.all().prefetch_related('assignees')
+    queryset = Task.objects.all().prefetch_related("assignees")
     serializer_class = TaskSerializer
-    
+
     def get_permissions(self):
         if self.request.method in ["PUT", "PATCH", "DELETE"]:
             return [IsAuthenticated(), IsProjectOwner()]
         return [IsAuthenticated(), IsAnyRole()]
 
-    
-__all__ = ['TaskRetrieveUpdateDestroyAPIView']
+
+__all__ = ["TaskRetrieveUpdateDestroyAPIView"]

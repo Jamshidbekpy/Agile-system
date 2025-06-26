@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from apps.task.models import TaskHistory
+
+
 class TaskHistorySerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField()
 
