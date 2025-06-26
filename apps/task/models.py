@@ -68,3 +68,26 @@ class TaskHistory(models.Model):
 
     def __str__(self):
         return f"[{self.timestamp}] {self.user}: {self.action}"
+
+
+class Group(models.Model):
+    name = models.CharField(max_length=255)
+    members = models.ManyToManyField(User, verbose_name=_("Members"), related_name="chat_groups", blank=True)
+
+    class Meta:
+        verbose_name = _('Group')
+        verbose_name_plural = _('Groups')
+
+    def __str__(self):
+        return self.name
+    
+    
+class Notification(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True)
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('Notification')
+        verbose_name_plural = _('Notifications')
+        ordering = ['-timestamp']

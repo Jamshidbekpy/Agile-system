@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Task, TaskHistory, TaskAssignee
+from .models import Task, TaskHistory, TaskAssignee, Group, Notification
 from django.utils.translation import gettext_lazy as _
 
 
@@ -38,3 +38,17 @@ class TaskAssigneeAdmin(admin.ModelAdmin):
     list_display = ("task", "assignee")
     list_filter = ("task", "assignee")
     search_fields = ("task__title", "assignee__username")
+    
+    
+@admin.register(Group)
+class GroupAdmin(admin.ModelAdmin):
+    list_display = ("id","name")
+    search_fields = ("name",)
+    
+    
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ("group", "message", "timestamp")
+    list_filter = ("group", "timestamp")
+    search_fields = ("group__name", "message")
+    readonly_fields = ("group", "message", "timestamp")
