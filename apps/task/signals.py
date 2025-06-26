@@ -44,8 +44,7 @@ def handle_task_events(sender, instance, created, **kwargs):
             message = _("New task created: '{}'").format(title)
             Group.objects.create(name=f"notifications_{creator.username}_{task_id}")
             group_name = f"notifications_{creator.username}_{task_id}"
-            group_id = Group.objects.get(name=group_name).id
-            send_ws_and_email(creator, subject, message, group_name, group_id)
+            send_ws_and_email(creator, subject, message, group_name)
 
     # 2. TO_DO status → Developer/Tester
     elif status == TaskStatus.TO_DO:
@@ -69,7 +68,6 @@ def handle_task_events(sender, instance, created, **kwargs):
                     id=task_id, dev=developer_name
                 )
                 group_name = f"notifications_{creator.username}_{task_id}"
-                group_id = Group.objects.get(name=group_name).id
                 send_ws_and_email(user, subject, message, group_name)
 
     # 4. READY_FOR_TESTING → Tester
@@ -79,7 +77,6 @@ def handle_task_events(sender, instance, created, **kwargs):
                 subject = _("Task Ready for Testing")
                 message = _("#{id} is ready for testing").format(id=task_id)
                 group_name = f"notifications_{creator.username}_{task_id}"
-                group_id = Group.objects.get(name=group_name).id
                 send_ws_and_email(user, subject, message, group_name)
 
     # 5. REJECTED → Developer
@@ -89,7 +86,6 @@ def handle_task_events(sender, instance, created, **kwargs):
                 subject = _("Task Rejected")
                 message = _("#{id} was rejected: '{}'").format(task_id, rejection_comment)
                 group_name = f"notifications_{creator.username}_{task_id}"
-                group_id = Group.objects.get(name=group_name).id
                 send_ws_and_email(user, subject, message, group_name)
 
     # 6. HIGH Priority → All Assignees
@@ -98,6 +94,5 @@ def handle_task_events(sender, instance, created, **kwargs):
             subject = _("Urgent Task!")
             message = _("URGENT! Task #{id} (High): '{title}'").format(id=task_id, title=title)
             group_name = f"notifications_{creator.username}_{task_id}"
-            group_id = Group.objects.get(name=group_name).id
             send_ws_and_email(user, subject, message, group_name)
 
