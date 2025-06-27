@@ -102,16 +102,17 @@ QUERY_COUNTER = {
     "DQC_SLOW_THRESHOLD": 1,
     "DQC_INDENT_SQL": True,
     "DQC_PYGMENTS_STYLE": "tango",
-    "DQC_PRINT_ALL_QUERIES": False,
+    "DQC_PRINT_ALL_QUERIES": True,
     "DQC_DETECT_DUPLICATES": True,
     "DQC_DUPLICATE_COLOR": "red",
     "DQC_COUNT_QTY_MAP": {
         5: "green",
         10: "white",
         20: "yellow",
-        30: "red",
+        30: "red",  
     },
 }
+
 ROOT_URLCONF = "core.urls"
 
 TEMPLATES = [

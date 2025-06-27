@@ -1,7 +1,7 @@
 import os
 import django
 
-django.setup()  # ⚠️ Django iloji boricha erta yuklansin
+django.setup() 
 
 from urllib.parse import parse_qs
 from channels.db import database_sync_to_async
@@ -37,12 +37,9 @@ class TokenAuthMiddleware:
                 payload = jwt_decode(token, settings.SECRET_KEY, algorithms=["HS256"])
                 user_id = payload.get("user_id")
 
-                # Debug
-                print("✅ JWT:", token)
-                print("👤 Payload:", payload)
+
 
                 scope["user"] = await get_user(user_id)
-                print("👤 User loaded:", scope["user"])
 
             except Exception as e:
                 print("❌ JWT Error:", e)

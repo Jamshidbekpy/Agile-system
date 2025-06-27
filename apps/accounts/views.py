@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from rest_framework import generics, permissions
 from rest_framework.response import Response
@@ -8,14 +9,13 @@ from apps.accounts.models import Role
 
 
 from .serializers import RegisterSerializer, UserSerializer, AssignRoleSerializer
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
 
 class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
     permission_classes = [permissions.AllowAny]
+    queryset = User.objects.all()
     serializer_class = RegisterSerializer
 
 
@@ -41,7 +41,7 @@ class UserMeView(generics.RetrieveAPIView):
 
 
 class AssignRoleAPIView(APIView):
-    permission_classes = [IsProjectOwner]
+    permission_classes = [permissions.IsAuthenticated, IsProjectOwner]
 
     def post(self, request, pk):
         try:

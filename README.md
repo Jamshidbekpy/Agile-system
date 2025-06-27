@@ -130,6 +130,8 @@ Bildirishnomalar:
 | `/api/v1/tasks/<id>/history/` | Task tarixi | GET | Har kim |
 | `/api/v1/users/register/` | Ro‘yxatdan o‘tish | POST | - |
 | `/api/v1/users/login/` | Login (JWT) | POST | - |
+| `/api/v1/users/assign-role/<int:pk>/` | Rolga tayinlash | POST | Project Owner |
+
 
 ---
 
