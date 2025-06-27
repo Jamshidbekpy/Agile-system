@@ -54,7 +54,6 @@ def handle_task_events(sender, instance, created, **kwargs):
                 subject = _("Task Assigned")
                 message = _("A task has been assigned to you: '{}'").format(title)
                 group_name = f"notifications_{creator.username}_{task_id}"
-                print("####################")
                 send_ws_and_email(user, subject, message, group_name)
 
     # 3. IN_PROGRESS → Project Manager
@@ -78,17 +77,20 @@ def handle_task_events(sender, instance, created, **kwargs):
                 message = _("#{id} is ready for testing").format(id=task_id)
                 group_name = f"notifications_{creator.username}_{task_id}"
                 send_ws_and_email(user, subject, message, group_name)
-
+    
     # 5. REJECTED → Developer
     elif status == TaskStatus.REJECTED:
+        print("Rejected ##############################")
         for user in assignees:
             if user.role == "developer":
                 subject = _("Task Rejected")
-                message = _("#{id} was rejected: '{}'").format(
-                    task_id, rejection_comment
-                )
+                message = _(f"#{title} was rejected: '{rejection_comment}'")
+                print(message)
                 group_name = f"notifications_{creator.username}_{task_id}"
                 send_ws_and_email(user, subject, message, group_name)
+        status = TaskStatus.TO_DO
+        instance.status = status
+        instance.save()
 
     # 6. HIGH Priority → All Assignees
     if priority == TaskPriority.HIGH:
