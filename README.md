@@ -71,7 +71,7 @@ python manage.py runserver
 
 ---
 
-## ASGI (WebSocket) uchun sozlash
+## Celery orqali email yuborish
 
 ```bash
 # redis-server terminalda ochiq bo'lishi kerak
@@ -80,8 +80,6 @@ redis-server
 # Celery
 celery -A config worker -l info
 
-# Flower (Celery monitoring)
-celery -A config flower --port=5555
 ```
 
 ---
@@ -105,7 +103,7 @@ celery -A config flower --port=5555
 
 | Holat                    | Kimga yuboriladi |
 |--------------------------|------------------|
-| Yangi task               | Developer / Tester |
+| Tayinlangan              | Developer / Tester |
 | Status: In Progress      | Project Manager    |
 | Ready for Testing        | Tester             |
 | Rejected                 | Developer          |
@@ -121,14 +119,14 @@ Bildirishnomalar:
 
 | Endpoint | Tavsif | Method | Permission |
 |----------|--------|--------|------------|
-| `/api/tasks/` | Task ro'yxati / yaratish | GET, POST | Manager |
-| `/api/tasks/<id>/` | Task detallari | GET, PUT, DELETE | Har xil rollar |
-| `/api/tasks/<id>/change_status/` | Developer o'zgartiradi | POST | Developer |
-| `/api/tasks/<id>/approve/` | Tester qabul qiladi | POST | Tester |
-| `/api/tasks/<id>/reject/` | Tester rad etadi | POST | Tester |
-| `/api/tasks/<id>/history/` | Task tarixi | GET | Har kim |
-| `/api/users/register/` | Ro‘yxatdan o‘tish | POST | - |
-| `/api/users/login/` | Login (JWT) | POST | - |
+| `/api/v1/tasks/` | Task ro'yxati / yaratish | GET, POST | Manager |
+| `/api/v1/tasks/<id>/` | Task detallari | GET, PUT, DELETE | Har xil rollar |
+| `/api/v1/tasks/<id>/change_status/` | Manager or Developer o'zgartiradi | POST | Developer |
+| `/api/v1/tasks/<id>/approve/` | Tester qabul qiladi | POST | Tester |
+| `/api/v1/tasks/<id>/reject/` | Tester rad etadi | POST | Tester |
+| `/api/v1/tasks/<id>/history/` | Task tarixi | GET | Har kim |
+| `/api/v1/users/register/` | Ro‘yxatdan o‘tish | POST | - |
+| `/api/v1/users/login/` | Login (JWT) | POST | - |
 
 ---
 
