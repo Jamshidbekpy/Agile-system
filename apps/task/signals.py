@@ -45,6 +45,7 @@ def handle_task_events(sender, instance, created, **kwargs):
             Group.objects.create(name=f"notifications_{creator.username}_{task_id}")
             group_name = f"notifications_{creator.username}_{task_id}"
             send_ws_and_email(creator, subject, message, group_name)
+    
 
     # 2. TO_DO status → Developer/Tester
     elif status == TaskStatus.TO_DO:
@@ -63,9 +64,7 @@ def handle_task_events(sender, instance, created, **kwargs):
         for user in assignees:
             if user.role == "project_manager":
                 subject = _("Task in Progress")
-                message = _("#{id} task is in progress (Developer: {dev})").format(
-                    id=task_id, dev=developer_name
-                )
+                message = _(f"{title} task is in progress (Developer: {developer_name})")
                 group_name = f"notifications_{creator.username}_{task_id}"
                 send_ws_and_email(user, subject, message, group_name)
 
@@ -74,7 +73,7 @@ def handle_task_events(sender, instance, created, **kwargs):
         for user in assignees:
             if user.role == "tester":
                 subject = _("Task Ready for Testing")
-                message = _("#{id} is ready for testing").format(id=task_id)
+                message = _(f"{title} is ready for testing")
                 group_name = f"notifications_{creator.username}_{task_id}"
                 send_ws_and_email(user, subject, message, group_name)
     
@@ -96,8 +95,6 @@ def handle_task_events(sender, instance, created, **kwargs):
     if priority == TaskPriority.HIGH:
         for user in assignees:
             subject = _("Urgent Task!")
-            message = _("URGENT! Task #{id} (High): '{title}'").format(
-                id=task_id, title=title
-            )
+            message = _(f"URGENT! Task #{task_id} (High): '{title}'")
             group_name = f"notifications_{creator.username}_{task_id}"
             send_ws_and_email(user, subject, message, group_name)
