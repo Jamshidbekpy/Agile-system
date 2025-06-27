@@ -14,7 +14,14 @@ class TaskHistoryInline(admin.TabularInline):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "status", "priority", "created_at", "updated_at")
+    list_display = (
+        "id",
+        "title",
+        "status",
+        "colored_priority",
+        "created_at",
+        "updated_at",
+    )
     list_filter = (
         "id",
         "status",
@@ -27,6 +34,22 @@ class TaskAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at", "updated_at")
     ordering = ("-priority", "-created_at")
     inlines = [TaskHistoryInline]
+
+    def colored_priority(self, obj):
+        color = {"low": "green", "medium": "orange", "high": "red"}.get(
+            obj.priority, "gray"
+        )
+
+        from django.utils.html import format_html
+
+        return format_html(
+            '<span style="color: white; background-color: {}; padding: 3px 8px; border-radius: 6px;">{}</span>',
+            color,
+            obj.get_priority_display(),
+        )
+
+    colored_priority.short_description = "Priority"
+    colored_priority.admin_order_field = "priority"
 
 
 @admin.register(TaskHistory)
