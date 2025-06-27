@@ -1,6 +1,7 @@
 from django.contrib import admin
-from .models import Task, TaskHistory, TaskAssignee, Group, Notification
+from django.db.models import Case, When, Value, IntegerField
 from django.utils.translation import gettext_lazy as _
+from .models import Task, TaskHistory, TaskAssignee, Group, Notification
 
 
 class TaskHistoryInline(admin.TabularInline):
@@ -22,24 +23,28 @@ class TaskAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
-    list_filter = (
-        "id",
-        "status",
-        "priority",
-    )
-    search_fields = (
-        "title",
-        "description",
-    )
+    list_filter = ("status", "priority")
+    search_fields = ("title", "description")
     readonly_fields = ("created_at", "updated_at")
-    ordering = ("-priority", "-created_at")
     inlines = [TaskHistoryInline]
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.annotate(
+            priority_order=Case(
+                When(priority="high", then=Value(1)),
+                When(priority="medium", then=Value(2)),
+                When(priority="low", then=Value(3)),
+                default=Value(0),
+                output_field=IntegerField(),
+            )
+        )
+        return qs.order_by("-priority_order", "-created_at")
 
     def colored_priority(self, obj):
         color = {"low": "green", "medium": "orange", "high": "red"}.get(
             obj.priority, "gray"
         )
-
         from django.utils.html import format_html
 
         return format_html(
@@ -49,7 +54,7 @@ class TaskAdmin(admin.ModelAdmin):
         )
 
     colored_priority.short_description = "Priority"
-    colored_priority.admin_order_field = "priority"
+    colored_priority.admin_order_field = "priority_order"
 
 
 @admin.register(TaskHistory)
