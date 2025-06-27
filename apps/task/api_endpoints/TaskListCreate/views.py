@@ -8,7 +8,7 @@ from apps.task.permissions import IsProjectOwnerOrManager, IsAnyRole
 
 
 class TaskListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Task.objects.all().prefetch_related("assignees")
+    queryset = Task.objects.prefetch_related("assignees").all()
     serializer_class = TaskSerializer
 
     def perform_create(self, serializer):
