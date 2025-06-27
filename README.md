@@ -145,6 +145,12 @@ Bu komandani ishga tushirsangiz, 10 ta turli rollarga ega `Faker` asosidagi foyd
 
 ---
 
+## Qo'shimcha
+
+task.admin da task prioritylari UI da ko'rsatiladi low > yashil, medium > sariq, high > qizil
+
+---
+
 ## Swagger
 
 API'ni vizual test qilish:
