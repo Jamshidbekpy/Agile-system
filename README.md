@@ -12,7 +12,8 @@
 - Django REST Framework  
 - JWT Authentication (SimpleJWT)  
 - WebSocket (`channels`, `channels_redis`)  
-- Celery + Redis (background task va email bildirishnomalar uchun)  
+- Celery + Redis (background task va email bildirishnomalar uchun) 
+- django-query-counter optimizatsiya uchun
 - Swagger (drf-yasg)  
 - PostgreSQL  
 - Flower (Celery monitoring)  
@@ -110,7 +111,7 @@ celery -A config worker -l info
 | **High Priority task**   | **Barcha**         |
 
 Bildirishnomalar:
-- WebSocket orqali (`channel_layer.group_send`)
+- WebSocket orqali (`channel_layer.group_send`) + chat so'zlashuv
 - Email orqali (Celery + Django Email)
 
 ---
@@ -119,11 +120,13 @@ Bildirishnomalar:
 
 | Endpoint | Tavsif | Method | Permission |
 |----------|--------|--------|------------|
-| `/api/v1/tasks/` | Task ro'yxati / yaratish | GET, POST | Manager |
+| `/api/v1/tasks/` | Task ro'yxati -> low,medium,high bo'yicha tartib / yaratish/| GET, POST | Manager |
 | `/api/v1/tasks/<id>/` | Task detallari | GET, PUT, DELETE | Har xil rollar |
 | `/api/v1/tasks/<id>/change_status/` | Manager or Developer o'zgartiradi | POST | Developer |
 | `/api/v1/tasks/<id>/approve/` | Tester qabul qiladi | POST | Tester |
 | `/api/v1/tasks/<id>/reject/` | Tester rad etadi | POST | Tester |
+|`/api/v1/tasks/<id>/assign/` | Project Ower loyihaga a'zolar qo'shadi | POST | Project Owner (creator) |
+|`/api/v1/tasks/<id>/change_priority/` | Project Manager ustuvorlikni o'zgartiradi | POST | Project Manager|
 | `/api/v1/tasks/<id>/history/` | Task tarixi | GET | Har kim |
 | `/api/v1/users/register/` | Ro‘yxatdan o‘tish | POST | - |
 | `/api/v1/users/login/` | Login (JWT) | POST | - |
