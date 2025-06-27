@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
 from asgiref.sync import async_to_sync
@@ -23,7 +23,37 @@ def send_ws_and_email(user, subject, message, group_name):
     group = Group.objects.get(name=group_name)
     Notification.objects.create(group=group, message=message)
 
+# 1. Backlog → To Do Developer/Tester
+@receiver(pre_save, sender=Task)
+def handle_task_status_change(sender, instance, **kwargs):
+    if not instance.pk:
+        return  
 
+    try:
+        old_instance = Task.objects.get(pk=instance.pk)
+    except Task.DoesNotExist:
+        return  
+
+    old_status = old_instance.status
+    new_status = instance.status
+
+    if old_status == TaskStatus.BACKLOG and new_status == TaskStatus.TO_DO:
+        title = instance.title
+        creator = instance.creator
+        task_id = instance.pk
+
+        assignees = [
+            ta.assignee
+            for ta in TaskAssignee.objects.select_related("assignee").filter(task=instance)
+        ]
+
+        for user in assignees:
+            if user.role in ["developer", "tester"]:
+                subject = _("Task Assigned")
+                message = _(f"A task has been assigned to you: '{title}'")
+                group_name = f"notifications_{creator.username}_{task_id}"
+                send_ws_and_email(user, subject, message, group_name)       
+                              
 @receiver(post_save, sender=Task)
 def handle_task_events(sender, instance, created, **kwargs):
     task_id = instance.id
@@ -37,7 +67,7 @@ def handle_task_events(sender, instance, created, **kwargs):
         for ta in TaskAssignee.objects.select_related("assignee").filter(task=instance)
     ]
 
-    # 1. Yangi vazifa → Project Owner
+    # 2. Yangi vazifa → Project Owner
     if created:
         if creator.role == "project_owner":
             subject = _("New Task Assigned")
@@ -47,15 +77,7 @@ def handle_task_events(sender, instance, created, **kwargs):
             send_ws_and_email(creator, subject, message, group_name)
     
 
-    # 2. TO_DO status → Developer/Tester
-    elif status == TaskStatus.TO_DO:
-        for user in assignees:
-            if user.role == "developer" or user.role == "tester":
-                print(user.role)
-                subject = _("Task Assigned")
-                message = _("A task has been assigned to you: '{}'").format(title)
-                group_name = f"notifications_{creator.username}_{task_id}"
-                send_ws_and_email(user, subject, message, group_name)
+
 
     # 3. IN_PROGRESS → Project Manager
     elif status == TaskStatus.IN_PROGRESS:
