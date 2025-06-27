@@ -23,16 +23,17 @@ def send_ws_and_email(user, subject, message, group_name):
     group = Group.objects.get(name=group_name)
     Notification.objects.create(group=group, message=message)
 
+
 # 1. Backlog → To Do Developer/Tester
 @receiver(pre_save, sender=Task)
 def handle_task_status_change(sender, instance, **kwargs):
     if not instance.pk:
-        return  
+        return
 
     try:
         old_instance = Task.objects.get(pk=instance.pk)
     except Task.DoesNotExist:
-        return  
+        return
 
     old_status = old_instance.status
     new_status = instance.status
@@ -44,7 +45,9 @@ def handle_task_status_change(sender, instance, **kwargs):
 
         assignees = [
             ta.assignee
-            for ta in TaskAssignee.objects.select_related("assignee").filter(task=instance)
+            for ta in TaskAssignee.objects.select_related("assignee").filter(
+                task=instance
+            )
         ]
 
         for user in assignees:
@@ -52,8 +55,9 @@ def handle_task_status_change(sender, instance, **kwargs):
                 subject = _("Task Assigned")
                 message = _(f"A task has been assigned to you: '{title}'")
                 group_name = f"notifications_{creator.username}_{task_id}"
-                send_ws_and_email(user, subject, message, group_name)       
-                              
+                send_ws_and_email(user, subject, message, group_name)
+
+
 @receiver(post_save, sender=Task)
 def handle_task_events(sender, instance, created, **kwargs):
     task_id = instance.id
@@ -75,9 +79,6 @@ def handle_task_events(sender, instance, created, **kwargs):
             Group.objects.create(name=f"notifications_{creator.username}_{task_id}")
             group_name = f"notifications_{creator.username}_{task_id}"
             send_ws_and_email(creator, subject, message, group_name)
-    
-
-
 
     # 3. IN_PROGRESS → Project Manager
     elif status == TaskStatus.IN_PROGRESS:
@@ -86,7 +87,9 @@ def handle_task_events(sender, instance, created, **kwargs):
         for user in assignees:
             if user.role == "project_manager":
                 subject = _("Task in Progress")
-                message = _(f"{title} task is in progress (Developer: {developer_name})")
+                message = _(
+                    f"{title} task is in progress (Developer: {developer_name})"
+                )
                 group_name = f"notifications_{creator.username}_{task_id}"
                 send_ws_and_email(user, subject, message, group_name)
 
@@ -98,7 +101,7 @@ def handle_task_events(sender, instance, created, **kwargs):
                 message = _(f"{title} is ready for testing")
                 group_name = f"notifications_{creator.username}_{task_id}"
                 send_ws_and_email(user, subject, message, group_name)
-    
+
     # 5. REJECTED → Developer
     elif status == TaskStatus.REJECTED:
         print("Rejected ##############################")

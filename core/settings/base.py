@@ -109,7 +109,7 @@ QUERY_COUNTER = {
         5: "green",
         10: "white",
         20: "yellow",
-        30: "red",  
+        30: "red",
     },
 }
 

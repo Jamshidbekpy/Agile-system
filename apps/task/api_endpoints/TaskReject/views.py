@@ -36,8 +36,7 @@ class TaskRejectAPIView(APIView):
         reason = serializer.validated_data["reason"]
         if not reason:
             return Response({"error": _("Reason is required")}, status=400)
-        
-        
+
         task.status = TaskStatus.REJECTED
         task.rejection_comment = reason
         task.save()
@@ -48,7 +47,9 @@ class TaskRejectAPIView(APIView):
             action=_("Status: Rejected (Reason: '{}')").format(reason),
         )
 
-        return Response({"success": _("Task rejected and sent back to Rejected status")})
+        return Response(
+            {"success": _("Task rejected and sent back to Rejected status")}
+        )
 
 
 __all__ = ["TaskRejectAPIView"]

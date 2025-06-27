@@ -1,7 +1,7 @@
 import os
 import django
 
-django.setup() 
+django.setup()
 
 from urllib.parse import parse_qs
 from channels.db import database_sync_to_async
@@ -36,8 +36,6 @@ class TokenAuthMiddleware:
                 UntypedToken(token)
                 payload = jwt_decode(token, settings.SECRET_KEY, algorithms=["HS256"])
                 user_id = payload.get("user_id")
-
-
 
                 scope["user"] = await get_user(user_id)
 

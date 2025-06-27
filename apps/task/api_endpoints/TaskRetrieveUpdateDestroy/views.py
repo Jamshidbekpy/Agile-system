@@ -6,7 +6,9 @@ from apps.task.permissions import IsProjectOwner, IsAnyRole
 
 
 class TaskRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Task.objects.all().prefetch_related("assignees").select_related("creator")
+    queryset = (
+        Task.objects.all().prefetch_related("assignees").select_related("creator")
+    )
     serializer_class = TaskSerializer
 
     def get_permissions(self):

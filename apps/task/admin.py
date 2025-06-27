@@ -14,7 +14,7 @@ class TaskHistoryInline(admin.TabularInline):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ( "id","title", "status", "priority", "created_at", "updated_at")
+    list_display = ("id", "title", "status", "priority", "created_at", "updated_at")
     list_filter = (
         "id",
         "status",
