@@ -38,7 +38,7 @@ git clone https://github.com/Jamshidbekpy/Agile-system.git
 cd Agile-system
 python -m venv venv
 source venv/bin/activate  # yoki Windows: venv\Scripts\activate
-pip install -r requirements.txt
+pip install -r requirements/develop.txt
 ```
 
 ### .env misoli
