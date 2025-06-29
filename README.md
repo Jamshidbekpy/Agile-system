@@ -1,3 +1,177 @@
+# Agile-system
+
+**Agile-system** is a task management system based on the Agile methodology, similar to **Jira/Trello**. Users are interconnected through roles, with each role having specific permissions. The main goal of the project is to manage and monitor the task lifecycle in real time.
+
+---
+
+## Technologies
+
+- Python 3.12  
+- Django 5.x  
+- Django REST Framework  
+- JWT Authentication (SimpleJWT)  
+- WebSocket (`channels`, `channels_redis`)  
+- Celery + Redis (for background tasks and email notifications)  
+- django-query-counter (for optimization)  
+- Swagger (drf-yasg)  
+- PostgreSQL  
+- Flower (for monitoring Celery)  
+- Faker (for generating test users)
+
+---
+
+## Roles and Permissions
+
+| Role              | Permissions |
+|-------------------|-------------|
+| **Project Owner** | Create and register projects, assign roles |
+| **Project Manager** | Create tasks, assign assignees, change status and priority |
+| **Developer**     | Change task status from `To Do → In Progress → Ready for Testing` |
+| **Tester**        | Accept tasks (**✅ Done**) or reject them (**❌ To Do**) |
+
+---
+
+## Installation
+
+```bash
+git clone https://github.com/Jamshidbekpy/Agile-system.git
+cd Agile-system
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements/develop.txt
+```
+
+### .env example
+
+```
+SECRET_KEY=django-insecure-123
+DEBUG=True
+ALLOWED_HOSTS=127.0.0.1,localhost
+
+DATABASE_URL=postgres://user:password@localhost:5432/agile_db
+
+REDIS_URL=redis://localhost:6379
+
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=your@gmail.com
+EMAIL_HOST_PASSWORD=yourpassword
+EMAIL_USE_TLS=True
+```
+
+---
+
+## Running the Project
+
+```bash
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+```
+
+---
+
+## Sending Emails via Celery
+
+```bash
+# redis-server must be running in a terminal
+redis-server
+
+# Start Celery
+celery -A config worker -l info
+```
+
+---
+
+## Auth: JWT
+
+- `api/token/` – Login (email + password)
+- `api/token/refresh/` – Refresh token
+- `api/token/verify/` – Verify token
+
+---
+
+## Real Time: WebSocket
+
+- Channel messages are sent via Redis (`channels`)
+- `High Priority` tasks are sent to all users in real-time as notifications
+
+---
+
+## Notifications
+
+| Event                  | Sent to           |
+|------------------------|-------------------|
+| Assigned               | Developer / Tester |
+| Status: In Progress    | Project Manager    |
+| Ready for Testing      | Tester             |
+| Rejected               | Developer          |
+| **High Priority task** | **All users**      |
+
+Notification methods:
+- Via WebSocket (`channel_layer.group_send`) + chat
+- Via Email (Celery + Django Email)
+
+---
+
+## API Endpoints
+
+| Endpoint | Description | Method | Permission |
+|----------|-------------|--------|------------|
+| `/api/v1/tasks/` | List or create tasks by priority (low, medium, high) | GET, POST | Manager |
+| `/api/v1/tasks/<id>/` | Task details | GET, PUT, DELETE | Varies by role |
+| `/api/v1/tasks/<id>/change_status/` | Change status by Manager or Developer | POST | Developer |
+| `/api/v1/tasks/<id>/approve/` | Approve task | POST | Tester |
+| `/api/v1/tasks/<id>/reject/` | Reject task | POST | Tester |
+| `/api/v1/tasks/<id>/assign/` | Add members to project | POST | Project Owner |
+| `/api/v1/tasks/<id>/change_priority/` | Change task priority | POST | Project Manager |
+| `/api/v1/tasks/<id>/history/` | View task history | GET | Any role |
+| `/api/v1/users/register/` | Register | POST | - |
+| `/api/v1/users/login/` | Login (JWT) | POST | - |
+| `/api/v1/users/assign-role/<int:pk>/` | Assign role | POST | Project Owner |
+
+---
+
+## Create Test Users
+
+```bash
+python manage.py init_users 10
+```
+
+This command generates 10 `Faker`-based users with different roles.
+
+---
+
+## Extras
+
+In `task.admin`, task priorities are shown in the UI:
+- low → green
+- medium → yellow
+- high → red
+
+---
+
+## Swagger
+
+Visual API testing available at:
+```
+http://localhost:8000/swagger/
+```
+
+---
+
+## Author
+
+**Jamshidbek Shodibekov**  
+GitHub: [@Jamshidbekpy](https://github.com/Jamshidbekpy)
+
+---
+
+## License
+
+MIT License – `Agile-system` is an open-source project.
+
+
 
 # Agile-system
 
